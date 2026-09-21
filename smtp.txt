@@ -1,0 +1,5 @@
+$env:SMTP_HOST = "smtp.gmail.com"
+$env:SMTP_PORT = "587"
+$env:SMTP_USER = "your-email@gmail.com"
+$env:SMTP_PASSWORD = "your-app-password"
+$env:NOTIFY_EMAIL = "fallback-recipient@example.com"

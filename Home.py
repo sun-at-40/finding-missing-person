@@ -168,6 +168,8 @@ if st.session_state.get("authentication_status"):
             "Bangalore": (12.9716, 77.5946),
             "Hyderabad": (17.3850, 78.4867),
             "Chennai": (13.0827, 80.2707),
+            "Dindigul": (10.3673, 77.9803),
+            "Madurai": (9.9252, 78.1198),
             "Kolkata": (22.5726, 88.3639),
             "Pune": (18.5204, 73.8567),
             "Ahmedabad": (23.0225, 72.5714),
@@ -223,7 +225,8 @@ if st.session_state.get("authentication_status"):
             st.info("No cases with city data yet. Add a city when registering cases.")
         else:
             m = folium.Map(
-                location=[20.5937, 78.9629], zoom_start=5, tiles="CartoDB positron"
+                #location=[20.5937, 78.9629], zoom_start=5, tiles="CartoDB positron"
+                location=[20.5937, 78.9629], zoom_start=5, tiles="OpenStreetMap"
             )
 
             for city, data in counts.items():

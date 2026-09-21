@@ -36,7 +36,7 @@ from pages.helper.utils import _ensure_model_silent, extract_face_mesh_from_fram
 # ── Seed data ─────────────────────────────────────────────────────────────────
 
 CITIES = [
-    "Delhi", "Lucknow", "Kanpur", "Agra", "Meerut", "Varanasi",
+    "Delhi", "Dindigul", "Madurai", "Lucknow", "Kanpur", "Agra", "Meerut", "Varanasi",
     "Allahabad", "Mathura", "Bareilly", "Aligarh", "Moradabad",
     "Saharanpur", "Gorakhpur", "Firozabad", "Jhansi", "Noida",
     "Ghaziabad", "Faridabad", "Amritsar", "Ludhiana", "Jalandhar",

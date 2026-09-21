@@ -5,6 +5,7 @@ from pages.helper import emailer
 
 # Distance threshold used in match_algo — keep in sync
 DISTANCE_THRESHOLD = 3.0
+MIN_AUTO_MATCH_CONFIDENCE = 50.0
 
 
 def confidence_from_distance(distance: float) -> float:
@@ -98,8 +99,14 @@ elif st.session_state["login_status"]:
                                     submitted_case_id = submitted_case
                                     conf = None
 
-                                case_viewer(matched_id, submitted_case_id, conf)
-                                st.write("---")
+                                if conf is not None and conf < MIN_AUTO_MATCH_CONFIDENCE:
+                                    st.warning(
+                                        f"Possible match skipped: {conf:.0f}% confidence "
+                                        f"is below the {MIN_AUTO_MATCH_CONFIDENCE:.0f}% threshold."
+                                    )
+                                else:
+                                    case_viewer(matched_id, submitted_case_id, conf)
+                                    st.write("---")
                 else:
                     st.info("No matches found.")
 
