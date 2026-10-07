@@ -3,10 +3,13 @@ import uuid
 import json
 import tempfile
 
+import numpy as np
 import streamlit as st
 
 from pages.helper import db_queries
 from pages.helper.data_models import PublicSubmissions
+from pages.helper.match_algo import find_duplicate_cases
+from pages.helper.face_embedding import embed_face
 from pages.helper.utils import (
     image_obj_to_numpy,
     extract_face_mesh_landmarks,
@@ -14,6 +17,39 @@ from pages.helper.utils import (
 )
 
 st.set_page_config("Public Submission", initial_sidebar_state="collapsed")
+db_queries.create_db()
+
+
+def _fmt(dt):
+    return dt.strftime("%d %b %Y, %H:%M") if dt else "Not recorded"
+
+
+def show_solved_case(case):
+    """Render the original photo and details of an already solved case."""
+    with st.container(border=True):
+        photo_col, info_col = st.columns([1, 2])
+        photo_path = f"./resources/{case['id']}.jpg"
+        if os.path.exists(photo_path):
+            photo_col.image(photo_path, caption="Original photo", width=180)
+        else:
+            photo_col.caption("Original photo not available")
+        info_col.markdown(
+            f"**{case['name']}**, age {case['age']}"
+            f"{', ' + case['city'] if case['city'] else ''}\n\n"
+            f"- Last seen: {case['last_seen']}\n"
+            f"- Reported on: {_fmt(case['reported_on'])}\n"
+            f"- Solved on: {_fmt(case['solved_on'])}\n"
+            f"- Case ID: `{case['id']}`"
+        )
+
+
+def solved_matches(rgb_image, landmarks):
+    """Solved cases showing the same person as the face in rgb_image."""
+    pts = np.asarray(landmarks, dtype=float).reshape(-1, 3)
+    h, w = rgb_image.shape[:2]
+    near = (pts[:, 0].mean() * w, pts[:, 1].mean() * h)
+    embedding = embed_face(rgb_image, near=near)
+    return find_duplicate_cases(embedding, max_results=1, status="F")
 
 st.title("Report a Sighting")
 
@@ -58,7 +94,15 @@ if upload_mode == "Image":
                     face_detected = True
                     st.success("✅ Face detected.")
 
-    if image_obj and face_detected:
+    solved = solved_matches(image_numpy, face_mesh) if face_detected else []
+    if solved:
+        if uploaded_file_path and os.path.exists(uploaded_file_path):
+            os.remove(uploaded_file_path)
+        st.warning(
+            "✅ This person's case is already solved. No new submission is needed."
+        )
+        show_solved_case(solved[0])
+    elif image_obj and face_detected:
         with form_col.form(key="image_submission_form"):
             sub_name = st.text_input("Your Name *")
             mobile_number = st.text_input("Your Mobile Number * (10 digits)")
@@ -131,6 +175,16 @@ else:
                     thumb_cols = st.columns(min(len(extracted_faces), 4))
                     for idx, (_, frame_rgb) in enumerate(extracted_faces):
                         thumb_cols[idx % 4].image(frame_rgb, width=100)
+
+    new_faces = []
+    for landmarks, frame in extracted_faces:
+        solved = solved_matches(frame, landmarks)
+        if solved:
+            st.warning("✅ A person in this video already has a solved case.")
+            show_solved_case(solved[0])
+        else:
+            new_faces.append((landmarks, frame))
+    extracted_faces = new_faces
 
     if extracted_faces:
         with form_col.form(key="video_submission_form"):

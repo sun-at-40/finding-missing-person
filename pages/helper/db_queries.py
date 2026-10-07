@@ -1,5 +1,6 @@
 import os
 import sqlite3
+from datetime import datetime
 from sqlmodel import create_engine, Session, select
 
 from pages.helper.data_models import RegisteredCases, PublicSubmissions
@@ -24,6 +25,7 @@ def _migrate_db():
         ("registeredcases", "complainant_email", "TEXT"),
         ("registeredcases", "city", "TEXT"),
         ("registeredcases", "description", "TEXT"),
+        ("registeredcases", "solved_on", "DATETIME"),
     ]
     try:
         con = sqlite3.connect("sqlite_database.db")
@@ -43,6 +45,25 @@ def register_new_case(case_details: RegisteredCases):
     with Session(engine) as session:
         session.add(case_details)
         session.commit()
+
+
+def fetch_all_case_face_meshes():
+    """Return (id, name, age, city, last_seen, status, face_mesh, submitted_on, solved_on, matched_with)."""
+    with Session(engine) as session:
+        return session.exec(
+            select(
+                RegisteredCases.id,
+                RegisteredCases.name,
+                RegisteredCases.age,
+                RegisteredCases.city,
+                RegisteredCases.last_seen,
+                RegisteredCases.status,
+                RegisteredCases.face_mesh,
+                RegisteredCases.submitted_on,
+                RegisteredCases.solved_on,
+                RegisteredCases.matched_with,
+            )
+        ).all()
 
 
 def fetch_registered_cases(submitted_by: str, status: str):
@@ -135,6 +156,13 @@ def get_public_case_detail(case_id: str):
         return result
 
 
+def get_public_submission_time(case_id: str):
+    with Session(engine) as session:
+        return session.exec(
+            select(PublicSubmissions.submitted_on).where(PublicSubmissions.id == case_id)
+        ).first()
+
+
 def get_registered_case_detail(case_id: str):
     with Session(engine) as session:
         result = session.exec(
@@ -163,6 +191,7 @@ def update_found_status(register_case_id: str, public_case_id: str):
         ).one()
         registered_case_details.status = "F"
         registered_case_details.matched_with = str(public_case_id)
+        registered_case_details.solved_on = datetime.utcnow()
 
         public_case_details = session.exec(
             select(PublicSubmissions).where(PublicSubmissions.id == str(public_case_id))

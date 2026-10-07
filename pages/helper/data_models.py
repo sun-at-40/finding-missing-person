@@ -45,6 +45,7 @@ class RegisteredCases(SQLModel, table=True):
     status: str = Field(max_length=16, nullable=False)
     birth_marks: str = Field(max_length=512)
     matched_with: str = Field(nullable=True)
+    solved_on: datetime = Field(default=None, nullable=True)
 
 
 if __name__ == "__main__":

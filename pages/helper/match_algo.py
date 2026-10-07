@@ -11,7 +11,7 @@ import numpy as np
 warnings.filterwarnings(action="ignore")
 
 
-from pages.helper import db_queries
+from pages.helper import db_queries, face_embedding
 
 
 def get_public_cases_data(status="NF"):
@@ -118,6 +118,56 @@ def match(distance_threshold=3):
 
     return {"status": True, "result": matched_images}
 
+
+def find_duplicate_cases(embedding, max_results=3, status=None):
+    """Find registered cases (any user) showing the same person.
+
+    embedding: identity embedding from face_embedding.embed_face().
+    status: optionally restrict to "F" (found/solved) or "NF" cases.
+    Returns dicts for cases at or above the same-person similarity, best first.
+    """
+    if embedding is None:
+        return []
+    matches = []
+    for (
+        case_id,
+        name,
+        age,
+        city,
+        last_seen,
+        case_status,
+        mesh,
+        reported_on,
+        solved_on,
+        matched_with,
+    ) in db_queries.fetch_all_case_face_meshes():
+        if status and case_status != status:
+            continue
+        try:
+            existing = face_embedding.stored_case_embedding(case_id, json.loads(mesh))
+        except Exception:
+            continue
+        if existing is None:
+            continue
+        score = face_embedding.similarity(embedding, existing)
+        if score >= face_embedding.SAME_PERSON_THRESHOLD:
+            if not solved_on and matched_with:
+                solved_on = db_queries.get_public_submission_time(matched_with)
+            matches.append(
+                {
+                    "id": case_id,
+                    "name": name,
+                    "age": age,
+                    "city": city,
+                    "last_seen": last_seen,
+                    "status": case_status,
+                    "reported_on": reported_on,
+                    "solved_on": solved_on,
+                    "similarity": score,
+                }
+            )
+    matches.sort(key=lambda d: d["similarity"], reverse=True)
+    return matches[:max_results]
 
 if __name__ == "__main__":
     result = match()

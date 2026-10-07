@@ -6,6 +6,8 @@ import streamlit as st
 
 from pages.helper.data_models import RegisteredCases
 from pages.helper import db_queries
+from pages.helper.match_algo import find_duplicate_cases
+from pages.helper.face_embedding import embed_face
 from pages.helper.utils import image_obj_to_numpy, detect_all_faces, draw_face_boxes
 
 st.set_page_config(page_title="Register New Case")
@@ -109,7 +111,27 @@ elif st.session_state["login_status"]:
     # ── Registration form ─────────────────────────────────────────────────────
     face_ready = image_obj and faces and selected_face_idx is not None
 
+    duplicates = []
     if face_ready:
+        with st.spinner("Checking for existing complaints..."):
+            duplicates = find_duplicate_cases(
+                embed_face(image_numpy, bbox=faces[selected_face_idx]["bbox"])
+            )
+
+    if duplicates:
+        with form_col:
+            st.error(
+                "⚠️ A complaint for this missing person already exists in the system. "
+                "A new complaint cannot be filed."
+            )
+            for d in duplicates:
+                st.markdown(
+                    f"- **{d['name']}**, age {d['age']}"
+                    f"{', ' + d['city'] if d['city'] else ''} — "
+                    f"last seen: {d['last_seen']} — "
+                    f"status: {'Found' if d['status'] == 'F' else 'Not Found'}"
+                )
+    elif face_ready:
         with form_col.form(key="new_case_form"):
             name = st.text_input("Name *")
             father_name = st.text_input("Father's Name")
