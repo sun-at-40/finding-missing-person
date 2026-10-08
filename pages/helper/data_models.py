@@ -1,7 +1,16 @@
 from uuid import uuid4
-from datetime import datetime
+from datetime import datetime, timezone
+from typing import Optional
+
+from pydantic import NaiveDatetime
+from sqlalchemy import DateTime
 
 from sqlmodel import Field, create_engine, SQLModel
+
+
+def _utcnow() -> datetime:
+    # Naive UTC, matching how SQLite stores existing timestamps
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 class PublicSubmissions(SQLModel, table=True):
@@ -17,8 +26,9 @@ class PublicSubmissions(SQLModel, table=True):
     email: str = Field(max_length=64, nullable=True)
     status: str = Field(max_length=16, nullable=False)
     birth_marks: str = Field(max_length=512, nullable=True)
-    # Changed: datetime.utcnow() -> datetime.utcnow (remove parentheses)
-    submitted_on: datetime = Field(default_factory=datetime.utcnow, nullable=False)
+    submitted_on: NaiveDatetime = Field(
+        default_factory=_utcnow, sa_type=DateTime, nullable=False
+    )
 
 
 class RegisteredCases(SQLModel, table=True):
@@ -40,12 +50,15 @@ class RegisteredCases(SQLModel, table=True):
     city: str = Field(max_length=64, nullable=True, default=None)
     description: str = Field(max_length=1024, nullable=True, default=None)
     face_mesh: str = Field(nullable=False)  # JSON string of face mesh landmarks
-    # Changed: datetime.utcnow() -> datetime.utcnow (remove parentheses)
-    submitted_on: datetime = Field(default_factory=datetime.utcnow, nullable=False)
+    submitted_on: NaiveDatetime = Field(
+        default_factory=_utcnow, sa_type=DateTime, nullable=False
+    )
     status: str = Field(max_length=16, nullable=False)
     birth_marks: str = Field(max_length=512)
     matched_with: str = Field(nullable=True)
-    solved_on: datetime = Field(default=None, nullable=True)
+    solved_on: Optional[NaiveDatetime] = Field(
+        default=None, sa_type=DateTime, nullable=True
+    )
 
 
 if __name__ == "__main__":

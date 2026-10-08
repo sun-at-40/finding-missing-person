@@ -1,6 +1,6 @@
 import os
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlmodel import create_engine, Session, select
 
 from pages.helper.data_models import RegisteredCases, PublicSubmissions
@@ -191,7 +191,7 @@ def update_found_status(register_case_id: str, public_case_id: str):
         ).one()
         registered_case_details.status = "F"
         registered_case_details.matched_with = str(public_case_id)
-        registered_case_details.solved_on = datetime.utcnow()
+        registered_case_details.solved_on = datetime.now(timezone.utc).replace(tzinfo=None)
 
         public_case_details = session.exec(
             select(PublicSubmissions).where(PublicSubmissions.id == str(public_case_id))
