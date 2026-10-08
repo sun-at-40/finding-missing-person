@@ -5,6 +5,7 @@ from yaml import SafeLoader
 import streamlit_authenticator as stauth
 
 from pages.helper import db_queries
+from pages.helper.ui import render_staff_header
 
 # Initialise DB once at startup
 db_queries.create_db()
@@ -124,6 +125,8 @@ if st.session_state.get("authentication_status"):
 
     role = user_info.get("role", "Officer")
     st.session_state["role"] = role
+    st.session_state["name"] = user_info["name"]
+    render_staff_header()
 
     role_colour = "#e74c3c" if role.lower() == "admin" else "#27ae60"
     role_badge = (

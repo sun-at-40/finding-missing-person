@@ -1,4 +1,6 @@
 import streamlit as st
+
+from pages.helper.ui import render_staff_header
 import pandas as pd
 
 from pages.helper import db_queries, emailer
@@ -165,6 +167,7 @@ if "login_status" not in st.session_state:
     st.write("You don't have access to this page")
 
 elif st.session_state["login_status"]:
+    render_staff_header()
     user = st.session_state.user
     is_admin = st.session_state.get("role", "").lower() == "admin"
 

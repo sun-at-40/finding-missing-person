@@ -4,6 +4,8 @@ import json
 
 import streamlit as st
 
+from pages.helper.ui import render_staff_header
+
 from pages.helper.data_models import RegisteredCases
 from pages.helper import db_queries
 from pages.helper.match_algo import find_duplicate_cases
@@ -17,6 +19,7 @@ if "login_status" not in st.session_state:
     st.write("You don't have access to this page")
 
 elif st.session_state["login_status"]:
+    render_staff_header()
     user = st.session_state.user
 
     st.title("Register New Case")

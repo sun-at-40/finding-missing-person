@@ -47,6 +47,27 @@ def register_new_case(case_details: RegisteredCases):
         session.commit()
 
 
+def fetch_cases_by_status(status: str):
+    """Public-safe case details (no contact or ID numbers) for a status, newest first."""
+    with Session(engine) as session:
+        return session.exec(
+            select(
+                RegisteredCases.id,
+                RegisteredCases.name,
+                RegisteredCases.age,
+                RegisteredCases.city,
+                RegisteredCases.last_seen,
+                RegisteredCases.birth_marks,
+                RegisteredCases.description,
+                RegisteredCases.submitted_on,
+                RegisteredCases.solved_on,
+                RegisteredCases.matched_with,
+            )
+            .where(RegisteredCases.status == status)
+            .order_by(RegisteredCases.submitted_on.desc())
+        ).all()
+
+
 def fetch_all_case_face_meshes():
     """Return (id, name, age, city, last_seen, status, face_mesh, submitted_on, solved_on, matched_with)."""
     with Session(engine) as session:

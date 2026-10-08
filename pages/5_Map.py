@@ -1,6 +1,7 @@
 import streamlit as st
 
 from pages.helper import db_queries
+from pages.helper.ui import render_staff_header
 
 st.set_page_config(page_title="Cases Map")
 
@@ -8,6 +9,7 @@ if "login_status" not in st.session_state:
     st.write("You don't have access to this page")
 
 elif st.session_state["login_status"]:
+    render_staff_header()
     st.title("Cases by City — India Map")
 
     try:
