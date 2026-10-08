@@ -3,6 +3,7 @@ import base64
 import streamlit as st
 from yaml import SafeLoader
 import streamlit_authenticator as stauth
+from streamlit_authenticator.utilities.exceptions import LoginError
 
 from pages.helper import db_queries
 from pages.helper.ui import render_staff_header
@@ -113,7 +114,18 @@ if not st.session_state.get("authentication_status"):
     )
 
 # Perform login — updates session state authentication_status
-authenticator.login(location="main")
+try:
+    authenticator.login(location="main")
+    st.session_state.pop("stale_cookie_retry", None)
+except LoginError:
+    # Browser holds a login cookie for a user no longer in login_config.yml
+    authenticator.cookie_controller.delete_cookie()
+    st.session_state["authentication_status"] = None
+    if not st.session_state.get("stale_cookie_retry"):
+        st.session_state["stale_cookie_retry"] = True
+        st.rerun()
+    st.warning("Your previous session is no longer valid. Please refresh the page and log in again.")
+    st.stop()
 
 # ── Post-login dashboard ──────────────────────────────────────────────────────
 if st.session_state.get("authentication_status"):
