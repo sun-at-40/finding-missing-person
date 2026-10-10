@@ -26,6 +26,7 @@ class PublicSubmissions(SQLModel, table=True):
     email: str = Field(max_length=64, nullable=True)
     status: str = Field(max_length=16, nullable=False)
     birth_marks: str = Field(max_length=512, nullable=True)
+    observed_on: str = Field(max_length=32, nullable=True, default=None)
     submitted_on: NaiveDatetime = Field(
         default_factory=_utcnow, sa_type=DateTime, nullable=False
     )

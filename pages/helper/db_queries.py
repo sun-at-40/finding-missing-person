@@ -26,6 +26,7 @@ def _migrate_db():
         ("registeredcases", "city", "TEXT"),
         ("registeredcases", "description", "TEXT"),
         ("registeredcases", "solved_on", "DATETIME"),
+        ("publicsubmissions", "observed_on", "TEXT"),
     ]
     try:
         con = sqlite3.connect("sqlite_database.db")
@@ -66,6 +67,24 @@ def fetch_cases_by_status(status: str):
             .where(RegisteredCases.status == status)
             .order_by(RegisteredCases.submitted_on.desc())
         ).all()
+
+
+def get_public_case_by_id(case_id: str):
+    """Return public-safe details for one registered case, or None if it is unavailable."""
+    with Session(engine) as session:
+        return session.exec(
+            select(
+                RegisteredCases.id,
+                RegisteredCases.name,
+                RegisteredCases.age,
+                RegisteredCases.city,
+                RegisteredCases.last_seen,
+                RegisteredCases.birth_marks,
+                RegisteredCases.description,
+                RegisteredCases.submitted_on,
+                RegisteredCases.status,
+            ).where(RegisteredCases.id == case_id)
+        ).first()
 
 
 def fetch_all_case_face_meshes():

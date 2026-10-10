@@ -13,7 +13,7 @@ def _fmt(dt):
 
 def show_case_list(status: str, title: str, empty_message: str):
     """List cases with the given status ("NF" pending, "F" solved)."""
-    st.title(title)
+    st.markdown(f'<div class="section-kicker">Community case board</div><h1>{title}</h1>', unsafe_allow_html=True)
     solved = status == "F"
 
     cases = db_queries.fetch_cases_by_status(status)
@@ -51,7 +51,8 @@ def show_case_list(status: str, title: str, empty_message: str):
     ) in cases[page * PAGE_SIZE : (page + 1) * PAGE_SIZE]:
         if solved and not solved_on and matched_with:
             solved_on = db_queries.get_public_submission_time(matched_with)
-        with st.container(border=True):
+        with st.container():
+            st.markdown('<div class="case-card">', unsafe_allow_html=True)
             photo_col, info_col = st.columns([1, 3])
             photo_path = f"./resources/{case_id}.jpg"
             if os.path.exists(photo_path):
@@ -70,3 +71,4 @@ def show_case_list(status: str, title: str, empty_message: str):
             if description:
                 lines.append(f"- Description: {description}")
             info_col.markdown("\n".join(lines))
+            st.markdown("</div>", unsafe_allow_html=True)

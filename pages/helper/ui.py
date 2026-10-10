@@ -23,15 +23,17 @@ _LOGO = " ".join(
 
 _CSS = """
 <style>
-/* Leave room for Streamlit's fixed top toolbar (about 3.75rem tall) */
-.block-container { padding-top: 4.5rem; }
+/* Shared foundation for the public and officer experiences. */
+.block-container { padding-top: 4.8rem; max-width: 1180px; }
+.stApp { background: #f5f7fb; }
+.stMarkdown, .stTextInput, .stTextArea, .stSelectbox, .stFileUploader { color: #172033; }
 .app-header {
     display: flex; align-items: center; justify-content: space-between;
     gap: 1rem; flex-wrap: wrap;
     padding: 0.9rem 1.4rem; margin-bottom: 1.2rem;
     border-radius: 14px; color: #fff;
-    background: linear-gradient(120deg, #0d2b6b 0%, #1565c0 60%, #1e88e5 100%);
-    box-shadow: 0 4px 16px rgba(21, 101, 192, 0.30);
+    background: linear-gradient(120deg, #102a43 0%, #176b87 58%, #1f9d8b 100%);
+    box-shadow: 0 8px 24px rgba(16, 42, 67, 0.18);
 }
 .app-header .brand { display: flex; align-items: center; gap: 0.9rem; }
 .app-header .app-title { font-size: 1.35rem; font-weight: 700; line-height: 1.2; }
@@ -42,10 +44,22 @@ _CSS = """
     padding: 0.35rem 0.9rem; font-size: 0.88rem; white-space: nowrap;
 }
 .app-header .role-badge {
-    background: #fff; color: #0d47a1; font-weight: 700;
+    background: #fff; color: #176b87; font-weight: 700;
     border-radius: 999px; padding: 2px 10px; font-size: 0.78rem;
 }
 .app-header .dot { width: 8px; height: 8px; border-radius: 50%; background: #69f0ae; }
+.section-kicker { color: #1f9d8b; text-transform: uppercase; letter-spacing: .12em;
+    font-size: .72rem; font-weight: 800; margin-bottom: .35rem; }
+.hero-panel { padding: 2.1rem 2.3rem; border-radius: 22px; color: white;
+    background: linear-gradient(125deg, #102a43, #176b87 65%, #1f9d8b);
+    box-shadow: 0 12px 30px rgba(16,42,67,.18); }
+.hero-panel h1 { font-size: clamp(2rem, 5vw, 3.35rem); line-height: 1.05; margin: 0 0 .65rem; }
+.hero-panel p { max-width: 680px; color: rgba(255,255,255,.83); font-size: 1.05rem; }
+.stat-card { padding: 1.1rem 1.25rem; background: white; border: 1px solid #e6ebf2;
+    border-radius: 16px; box-shadow: 0 5px 18px rgba(16,42,67,.06); }
+.stat-card .value { color: #102a43; font-size: 1.8rem; font-weight: 800; }
+.case-card { padding: 1rem; background: white; border: 1px solid #e6ebf2;
+    border-radius: 16px; box-shadow: 0 5px 18px rgba(16,42,67,.05); }
 </style>
 """
 
